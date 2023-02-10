@@ -8,6 +8,7 @@ public class TCPClient {
     public TCPClient() {
     }
 
+
     public byte[] askServer(String hostname, int port) throws IOException{
         ByteArrayOutputStream testBuffer = new ByteArrayOutputStream();
         int data = 0;
