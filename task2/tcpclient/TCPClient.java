@@ -33,10 +33,10 @@ public class TCPClient {
         cSocket.setSoTimeout(timeout);
         try{
             while(data != -1 && countByte <= limit){
-                countByte+=data;
                 data = cSocket.getInputStream().read();
 
                 if(data != -1 && countByte <= limit) {
+                    countByte++;
                     testBuffer.write(data);
                 }
             }
