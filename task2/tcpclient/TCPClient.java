@@ -1,7 +1,6 @@
 package tcpclient;
 import java.net.*;
 import java.io.*;
-//BIT LIMIT MIGHT BE WRONG! NOT SURE! EVERYTHING ELSE SHOULD WORK THOUGH.
 public class TCPClient {
     boolean shutdown = false;
     Integer timeout = null;
@@ -32,10 +31,10 @@ public class TCPClient {
         }
         cSocket.setSoTimeout(timeout);
         try{
-            while(data != -1 && countByte <= limit){
+            while(data != -1 && countByte < limit){
                 data = cSocket.getInputStream().read();
 
-                if(data != -1 && countByte <= limit) {
+                if(data != -1 && countByte < limit) {
                     countByte++;
                     testBuffer.write(data);
                 }
@@ -71,12 +70,11 @@ public class TCPClient {
         }
         cSocket.setSoTimeout(timeout);
         try{
-            while(data != -1 && countByte <= limit){
-                countByte+=data;
-                System.out.println(data);
+            while(data != -1 && countByte < limit){
                 data = cSocket.getInputStream().read();
 
-                if(data != -1 && countByte <= limit) {
+                if(data != -1 && countByte < limit) {
+                    countByte++;
                     testBuffer.write(data);
                 }
             }
