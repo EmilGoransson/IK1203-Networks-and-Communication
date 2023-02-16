@@ -64,6 +64,7 @@ public class HTTPAsk {
 
                 //Connects and reads data from client
                 OutputStream output = clientSocket.getOutputStream();
+
                 TCPClient client = new TCPClient(shutdown, timeout, limit);
 
                 if (hostname == null || portServer == 0) {
@@ -74,11 +75,17 @@ public class HTTPAsk {
                     clientSocket.close();
                     continue;
                 }
-                if (!string.equals("")) {
-                    response = client.askServer(hostname, portServer, string.getBytes());
-                } else {
-                    response = client.askServer(hostname, portServer);
+                try {
+                    if (!string.equals("")) {
+                        response = client.askServer(hostname, portServer, string.getBytes());
+                    } else {
+                        response = client.askServer(hostname, portServer);
+                    }
+                } catch (IOException e) {
+                    statusResponse = "HTTP/1.1 404 Not Found\r\n\r\n";
+                    response = statusResponse.getBytes();
                 }
+
 
                 //writes data HTML
                 output.write(statusResponse.getBytes());
