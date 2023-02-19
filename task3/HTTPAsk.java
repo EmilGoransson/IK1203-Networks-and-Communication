@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class HTTPAsk {
 
     public static void main(String[] args) {
-        int port = Integer.parseInt("8888");
+        int port = Integer.parseInt(args[0]);
         try {
             while (true) {
                 //declare variables
