@@ -36,10 +36,14 @@ public class HTTPAsk {
                 String[] arrayServerOutput = serverOutput.split(" ");
                 String statusResponse = "HTTP/1.1 400 Bad Request\r\n\r\n";
 
+
                 //handle different conditions and check flags
                 try {
                     String[] argArr = arrayServerOutput[1].split("&");
-                    if (argArr[0].contains("/ask?hostname=")) {
+                    System.out.println(Arrays.toString(arrayServerOutput));
+                    if (!arrayServerOutput[0].contains("GET") || !arrayServerOutput[2].contains("HTTP/1.1")) {
+                        statusResponse = "HTTP/1.1 400 Bad Request\r\n\r\n";
+                    } else if (argArr[0].contains("/ask?hostname=")) {
                         hostname = argArr[0].substring(14);
                         statusResponse = "HTTP/1.1 200 OK\r\n\r\n";
                     }
