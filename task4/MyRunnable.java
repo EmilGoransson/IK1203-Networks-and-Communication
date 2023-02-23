@@ -3,13 +3,13 @@ import java.io.*;
 import java.util.Arrays;
 
 public class MyRunnable implements Runnable {
-    private x Parameter;
+    Socket clientSocket;
+
     public MyRunnable(Socket socket) {
-        this.Parameter = Parameter;
+        clientSocket = socket;
     }
 
-    public static void main(String[] args) {
-        int port = Integer.parseInt(args[0]);
+    public void run(){
         try {
             while (true) {
                 //declare variables
@@ -23,8 +23,6 @@ public class MyRunnable implements Runnable {
                 byte[] response;
 
                 ByteArrayOutputStream testBuffer = new ByteArrayOutputStream();
-                ServerSocket serverSocket = new ServerSocket(port);
-                Socket clientSocket = serverSocket.accept();
 
 
                 //Read URL, 13 is empty line.
@@ -44,7 +42,6 @@ public class MyRunnable implements Runnable {
                 //handle different conditions and check flags
                 try {
                     String[] argArr = arrayServerOutput[1].split("&");
-                    System.out.println(Arrays.toString(arrayServerOutput));
                     if (!arrayServerOutput[0].contains("GET") || !arrayServerOutput[2].contains("HTTP/1.1")) {
                         statusResponse = "HTTP/1.1 400 Bad Request\r\n\r\n";
                     } else if (argArr[0].contains("/ask?hostname=")) {
@@ -79,7 +76,6 @@ public class MyRunnable implements Runnable {
                     output.write(statusResponse.getBytes());
                     output.flush();
                     output.close();
-                    serverSocket.close();
                     clientSocket.close();
                     continue;
                 }
@@ -100,12 +96,10 @@ public class MyRunnable implements Runnable {
                 output.write(response);
                 output.flush();
                 output.close();
-                serverSocket.close();
                 clientSocket.close();
             }
         } catch (IOException e) {
-            System.out.println("Error using port: " + port);
-            System.exit(-1);
+
         }
     }
 }
