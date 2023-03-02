@@ -1,14 +1,16 @@
 import java.net.*;
 import java.io.*;
-import java.util.Arrays;
 
 public class HTTPAsk {
 
+
     public static void main(String[] args) {
         int port = Integer.parseInt(args[0]);
+        String response200 = "HTTP/1.1 200 OK\r\n\r\n";
+        String response400 = "HTTP/1.1 400 Bad Request\r\n\r\n";
+        String response404 = "HTTP/1.1 404 Not Found\r\n\r\n";
         try {
             while (true) {
-                //declare variables
                 boolean shutdown = false;
                 Integer timeout = null;
                 Integer limit = null;
@@ -17,90 +19,88 @@ public class HTTPAsk {
                 int portServer = 0;
                 int data = 0;
                 byte[] response;
-
-                ByteArrayOutputStream testBuffer = new ByteArrayOutputStream();
+                String statusRes;
+                ByteArrayOutputStream dataBuffer = new ByteArrayOutputStream();
                 ServerSocket serverSocket = new ServerSocket(port);
                 Socket clientSocket = serverSocket.accept();
-
+                OutputStream output = clientSocket.getOutputStream();
 
                 //Read URL, 13 is empty line.
                 while (data != 13) {
                     data = clientSocket.getInputStream().read();
-
                     if (data != 13) {
-                        testBuffer.write(data);
+                        dataBuffer.write(data);
                     }
                 }
-                //manage URL
-                String serverOutput = testBuffer.toString();
-                String[] arrayServerOutput = serverOutput.split(" ");
-                String statusResponse = "HTTP/1.1 400 Bad Request\r\n\r\n";
+                String serverOutput = dataBuffer.toString();
+                String[] arrServerOutput = serverOutput.split(" ");
+                String[] argArr = arrServerOutput[1].split("&");
 
 
-                //handle different conditions and check flags
-                try {
-                    String[] argArr = arrayServerOutput[1].split("&");
-                    if (!arrayServerOutput[0].contains("GET") || !arrayServerOutput[2].contains("HTTP/1.1")) {
-                        statusResponse = "HTTP/1.1 400 Bad Request\r\n\r\n";
-                    } else if (argArr[0].contains("/ask?hostname=")) {
-                        hostname = argArr[0].substring(14);
-                        statusResponse = "HTTP/1.1 200 OK\r\n\r\n";
-                    }
+                if (arrServerOutput[0].contains("GET") && arrServerOutput[2].contains("HTTP/1.1")
+                        && arrServerOutput[1].contains("/ask?hostname=")) {
                     for (String s : argArr) {
+                        if (s.contains("hostname=")) {
+                            hostname = s.substring(14);
+                        }
                         if (s.contains("port=")) {
                             portServer = Integer.parseInt(s.substring(5));
                         }
                         if (s.contains("limit=")) {
                             limit = Integer.parseInt(s.substring(6));
                         }
-                        if (s.contains("shutdown=")) {
-                            shutdown = Boolean.parseBoolean(s.substring(9));
-                        }
                         if (s.contains("string=")) {
                             string = s.substring(7);
                         }
+                        if (s.contains("timeout=")) {
+                            timeout = Integer.parseInt(s.substring(8));
+                        }
                     }
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    statusResponse = "HTTP/1.1 400 Bad Request\r\n\r\n";
-                }
+                    if ((hostname != null) && (portServer != 0)) {
+                        TCPClient client = new TCPClient(shutdown, timeout, limit);
 
+                        try {
+                            if (!string.equals("")) {
+                                response = client.askServer(hostname, portServer, string.getBytes());
+                            } else {
+                                response = client.askServer(hostname, portServer);
+                            }
+                            output.write(response200.getBytes());
+                            output.write(response);
+                            output.flush();
+                            output.close();
+                            serverSocket.close();
+                            clientSocket.close();
+                        } catch (IOException e) {
+                            output.write(response404.getBytes());
+                            output.flush();
+                            output.close();
+                            serverSocket.close();
+                            clientSocket.close();
+                        }
 
-                //Connects and reads data from client
-                OutputStream output = clientSocket.getOutputStream();
+                    } else {
+                        output.write(response400.getBytes());
+                        output.flush();
+                        output.close();
+                        serverSocket.close();
+                        clientSocket.close();
+                    }
 
-                TCPClient client = new TCPClient(shutdown, timeout, limit);
-
-                if (hostname == null || portServer == 0) {
-                    output.write(statusResponse.getBytes());
+                } else {
+                    output.write(response400.getBytes());
                     output.flush();
                     output.close();
                     serverSocket.close();
                     clientSocket.close();
-                    continue;
-                }
-                try {
-                    if (!string.equals("")) {
-                        response = client.askServer(hostname, portServer, string.getBytes());
-                    } else {
-                        response = client.askServer(hostname, portServer);
-                    }
-                } catch (IOException e) {
-                    statusResponse = "HTTP/1.1 404 Not Found\r\n\r\n";
-                    response = statusResponse.getBytes();
                 }
 
 
-                //writes data HTML
-                output.write(statusResponse.getBytes());
-                output.write(response);
-                output.flush();
-                output.close();
-                serverSocket.close();
-                clientSocket.close();
             }
         } catch (IOException e) {
             System.exit(-1);
         }
-    }
-}
 
+    }
+
+}
