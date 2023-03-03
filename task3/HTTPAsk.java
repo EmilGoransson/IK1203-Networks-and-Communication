@@ -36,6 +36,14 @@ public class HTTPAsk {
                 String[] arrServerOutput = serverOutput.split(" ");
                 String[] argArr = arrServerOutput[1].split("&");
 
+                if(!arrServerOutput[1].contains("/ask")){
+                    output.write(response404.getBytes());
+                    output.flush();
+                    output.close();
+                    serverSocket.close();
+                    clientSocket.close();
+                    continue;
+                }
 
                 if (arrServerOutput[0].contains("GET") && arrServerOutput[2].contains("HTTP/1.1")
                         && arrServerOutput[1].contains("/ask?hostname=")) {
@@ -71,12 +79,14 @@ public class HTTPAsk {
                             output.close();
                             serverSocket.close();
                             clientSocket.close();
+
                         } catch (IOException e) {
                             output.write(response404.getBytes());
                             output.flush();
                             output.close();
                             serverSocket.close();
                             clientSocket.close();
+
                         }
 
                     } else {
@@ -85,6 +95,7 @@ public class HTTPAsk {
                         output.close();
                         serverSocket.close();
                         clientSocket.close();
+
                     }
 
                 } else {
@@ -93,6 +104,7 @@ public class HTTPAsk {
                     output.close();
                     serverSocket.close();
                     clientSocket.close();
+
                 }
 
 
