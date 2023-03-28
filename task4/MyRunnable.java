@@ -40,10 +40,7 @@ public class MyRunnable implements Runnable {
                 String[] argArr = arrServerOutput[1].split("&");
 
                 if(!arrServerOutput[1].contains("/ask")){
-                    output.write(response404.getBytes());
-                    output.flush();
-                    output.close();
-                    clientSocket.close();
+                    write(output, response404);
                     continue;
                 }
                 if (arrServerOutput[0].contains("GET") && arrServerOutput[2].contains("HTTP/1.1")
@@ -74,34 +71,40 @@ public class MyRunnable implements Runnable {
                             } else {
                                 response = client.askServer(hostname, portServer);
                             }
-                            output.write(response200.getBytes());
-                            output.write(response);
-                            output.flush();
-                            output.close();
-                            clientSocket.close();
+                            write(output, response200, response);
                         } catch (IOException e) {
-                            output.write(response404.getBytes());
-                            output.flush();
-                            output.close();
-                            clientSocket.close();
+                            write(output, response404);
                         }
 
                     } else {
-                        output.write(response400.getBytes());
-                        output.flush();
-                        output.close();
-                        clientSocket.close();
+                        write(output, response400);
                     }
 
                 } else {
-                    output.write(response400.getBytes());
-                    output.flush();
-                    output.close();
-                    clientSocket.close();
+                    write(output, response400);
                 }
             }
         } catch (IOException e) {
 
+        }
+    }
+    public void write(OutputStream out, String respStatus){
+        try {
+            out.write(respStatus.getBytes());
+            out.flush();
+            clientSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void write(OutputStream out, String respStatus, byte[] response){
+        try {
+            out.write(respStatus.getBytes());
+            out.write(response);
+            out.flush();
+            clientSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
